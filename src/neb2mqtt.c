@@ -50,7 +50,7 @@ int nag2mqtt_handle_host_check_data(int, void *);
 int nag2mqtt_handle_service_check_data(int, void *);
 
 char *basedir = "/run/nag2mqtt/publish";
-char *prefix = NULL;
+char *subprefix = NULL;
 char hostname[64];
 
 
@@ -127,8 +127,8 @@ int nebmodule_init(int flags, char *args, nebmodule *handle) {
 	continue;
       }
 
-      if(strcmp(we.we_wordv[i], "-prefix") == 0) {
-	p = &prefix;
+      if(strcmp(we.we_wordv[i], "-subprefix") == 0) {
+	p = &subprefix;
 	continue;
       }
 
@@ -144,7 +144,7 @@ int nebmodule_init(int flags, char *args, nebmodule *handle) {
   snprintf(buf, sizeof(buf), "nag2mqtt:  basedir = '%s'", basedir);
   buf[sizeof(buf) - 1] = 0;
   write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
-  snprintf(buf, sizeof(buf), "nag2mqtt:  prefix = '%s'", (prefix ? prefix : ""));
+  snprintf(buf, sizeof(buf), "nag2mqtt:  subprefix = '%s'", (subprefix ? subprefix : ""));
   buf[sizeof(buf) - 1] = 0;
   write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
   
@@ -203,7 +203,7 @@ int nag2mqtt_handle_host_check_data(int event_type, void *data) {
     json_object *json = json_object_new_object();
     JSON_ADD_INT(json, "_timestamp", (int)hostchkdata->timestamp.tv_sec);
     JSON_ADD_STR(json, "_hostname", hostname);
-    JSON_ADD_STR(json, "_prefix", prefix);
+    JSON_ADD_STR(json, "_subprefix", subprefix);
     JSON_ADD_STR(json, "_type", "HOST");
     JSON_ADD_STR(json, "hostname", hostchkdata->host_name);
     JSON_ADD_INT(json, "current_attempt", hostchkdata->current_attempt);
@@ -253,9 +253,10 @@ int nag2mqtt_handle_service_check_data(int event_type, void *data) {
   if(fh) {
     char *ptr;
     json_object *json = json_object_new_object();
-    JSON_ADD_INT(json, "timestamp", (int)srvchkdata->timestamp.tv_sec);
-    JSON_ADD_STR(json, "type", "SERVICE");
-    JSON_ADD_STR(json, "prefix", prefix);
+    JSON_ADD_INT(json, "_timestamp", (int)srvchkdata->timestamp.tv_sec);
+    JSON_ADD_STR(json, "_hostname", hostname);
+    JSON_ADD_STR(json, "_subprefix", subprefix);
+    JSON_ADD_STR(json, "_type", "SERVICE");
     JSON_ADD_STR(json, "hostname", srvchkdata->host_name);
     JSON_ADD_STR(json, "service_description", srvchkdata->service_description);
     JSON_ADD_INT(json, "current_attempt", srvchkdata->current_attempt);
