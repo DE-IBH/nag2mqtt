@@ -109,36 +109,38 @@ int nebmodule_init(int flags, char *args, nebmodule *handle) {
   hostname[sizeof(hostname) - 1] = 0;
 
   /* Parse options */
-  wordexp_t we;
-  if(wordexp(args, &we, 0)) {
-    write_to_all_logs("nag2mqtt: Failed to expand arguments!", NSLOG_CONFIG_ERROR);
-    return 1;
-  }
-
-  int i;
-  char **p = NULL;
-  for(i = 0; i < we.we_wordc; i++) {
-    if(p) {
-      *p = strdup(we.we_wordv[i]);
-    }
-    else {
-      if(strcmp(we.we_wordv[i], "-basedir") == 0) {
-	p = &basedir;
-	continue;
-      }
-
-      if(strcmp(we.we_wordv[i], "-subprefix") == 0) {
-	p = &subprefix;
-	continue;
-      }
-
-      snprintf(buf, sizeof(buf), "nag2mqtt: Unknown option #%d '%s'!", (i + 1), we.we_wordv[i]);
-      buf[sizeof(buf) - 1] = 0;
-      write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
+  if(args) {
+    wordexp_t we;
+    if(wordexp(args, &we, 0)) {
+      write_to_all_logs("nag2mqtt: Failed to expand arguments!", NSLOG_CONFIG_ERROR);
       return 1;
     }
+
+    int i;
+    char **p = NULL;
+    for(i = 0; i < we.we_wordc; i++) {
+      if(p) {
+	*p = strdup(we.we_wordv[i]);
+      }
+      else {
+	if(strcmp(we.we_wordv[i], "-basedir") == 0) {
+	  p = &basedir;
+	  continue;
+	}
+
+	if(strcmp(we.we_wordv[i], "-subprefix") == 0) {
+	  p = &subprefix;
+	  continue;
+	}
+
+	snprintf(buf, sizeof(buf), "nag2mqtt: Unknown option #%d '%s'!", (i + 1), we.we_wordv[i]);
+	buf[sizeof(buf) - 1] = 0;
+	write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
+	return 1;
+      }
+    }
+    wordfree(&we);
   }
-  wordfree(&we);
 
   /* Dump config */
   snprintf(buf, sizeof(buf), "nag2mqtt:  basedir = '%s'", basedir);
