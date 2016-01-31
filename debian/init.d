@@ -59,10 +59,10 @@ do_start()
 	#	|| return 2
 	# The above code will not work for interpreted scripts, use the next
 	# six lines below instead (Ref: #643337, start-stop-daemon(8) )
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --startas $DAEMON \
+	start-stop-daemon --start --background --quiet --pidfile $PIDFILE --startas $DAEMON \
 		--name $NAME --chuid $USERNAME --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --startas $DAEMON \
+	start-stop-daemon --start --background --quiet --pidfile $PIDFILE --startas $DAEMON \
 		--name $NAME --chuid $USERNAME -- $DAEMON_ARGS \
 		|| return 2
 
