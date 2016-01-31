@@ -3,3 +3,10 @@
 *~
 \#*#
 .#*
+debian/files
+debian/nag2mqtt.debhelper.log
+debian/nag2mqtt.postinst.debhelper
+debian/nag2mqtt.postrm.debhelper
+debian/nag2mqtt.prerm.debhelper
+debian/nag2mqtt.substvars
+debian/nag2mqtt/

@@ -1,28 +1,27 @@
 #!/usr/bin/perl
 
-/* nag2mqtt - Nagios event broker to MQTT gateway
- *
- * Authors:
- *   Thomas Liske <liske@ibh.de>
- *
- * Copyright Holder:
- *   2016 (C) IBH IT-Service GmbH [https://github.com/DE-IBH/nag2mqtt/]
- *
- * License:
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this package; if not, write to the Free Software
- *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- */
+# nag2mqtt - Nagios event broker to MQTT gateway
+#
+# Authors:
+#   Thomas Liske <liske@ibh.de>
+#
+# Copyright Holder:
+#   2016 (C) IBH IT-Service GmbH [https://github.com/DE-IBH/nag2mqtt/]
+#
+# License:
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this package; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 use warnings;
 use strict;
@@ -30,19 +29,19 @@ use strict;
 use AnyEvent;
 use AnyEvent::MQTT;
 use Linux::Inotify2;
-use File::Slurp;
+use Getopt::Std;
 use JSON;
 use Sys::Hostname;
 
 my %conf = (
     base_dir => q(/run/nag2mqtt/publish),
-    base_topic => '/nagios',
+    base_topic => q(nagios),
 );
 
 my %mqtt_conf = (
     host => q(localhost),
 
-    will_topic => "$conf{base_topic}/hosts/".hostname,
+    will_topic => qq($conf{base_topic}/hosts/).hostname,
     will_retain => 1,
     will_message => encode_json({
 	state => q(dead),
@@ -56,6 +55,54 @@ my %mqtt_conf = (
 	die "$fatal $message\n";
     },
 );
+
+sub HELP_MESSAGE {
+    print <<USG;
+Usage:
+
+  nag2mqttd [-v] [-c <cfg>]
+
+    -v		be more verbose
+    -c <cfg>	config filename
+
+    --help      show this help
+    --version   show version information
+
+USG
+}
+
+sub VERSION_MESSAGE {
+    print <<LIC;
+
+nag2mqtt - Nagios event broker to MQTT gateway
+
+Authors:
+  Thomas Liske <liske\@ibh.de>
+
+Copyright Holder:
+  2016 (C) IBH IT-Service GmbH [https://github.com/DE-IBH/nag2mqtt/]
+
+License:
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+LIC
+#/
+}
+
+our $opt_c = '/etc/nag2mqtt/nag2mqtt.conf';
+our $opt_v;
+unless(getopts('c:v')) {
+    HELP_MESSAGE;
+    exit 1;
+}
+
+eval do { local(@ARGV, $/) = $opt_c; <> || ''};
+die "Error reading $opt_c: $!\n" if($!);
+die "Error parsing $opt_c: $@\n" if($@);
+
 
 my %cv = (
     quit => AnyEvent->condvar,
@@ -72,7 +119,7 @@ $inotify->watch($conf{base_dir}, IN_ONLYDIR | IN_MOVED_TO, sub {
     my $e = shift;
     my $fn = $e->fullname;
 
-    publish_json( read_file($fn) );
+    publish_json( do { local(@ARGV, $/) = $fn; <> || ''} );
     unlink($fn);
  });
 
@@ -85,18 +132,48 @@ my $inot = AnyEvent->io(
 
 
 sub publish_json {
-    my $json = shift;
+    my $json = shift || return;
     my $href = decode_json($json);
-    
+
     my @topic = ('', split(/\//, $conf{base_topic}));
-    push(@topic, $href{_prefix}) if($href{_prefix});
-    push(@topic, $href{hostname});
-    push(@topic, $href{service_description}) if($href{_type} eq 'SERVICE');
+    push(@topic, $href->{_prefix}) if($href->{_prefix});
+    push(@topic, $href->{hostname});
+    push(@topic, $href->{service_description}) if($href->{_type} eq 'SERVICE');
     my $topic = join('/', @topic);
+
+    if(exists($href->{perf_data})) {
+	my $perf = $href->{perf_data};
+	my $data = {};
+	foreach my $date (split(/\s+/, $href->{perf_data})) {
+	    next unless($date =~ /([^=]+)=(.+)$/);
+
+	    my ($label, $d) = ($1, $2);
+	    my @d = split(/;/, $d);
+
+	    my $uom = ($d[0] =~ /\d+(\D+)$/ ? $1 : '');
+	    my $val = $d[0] || '';
+	    if($val ne '') {
+		$val =~ s/$uom$//;
+	    }
+	    else {
+		$val = 'U';
+	    }
+
+	    $data->{$label} = {
+		val => $val,
+		($uom ? (uom => $uom) : ()),
+		($d[1] || '' ne '' ? (warn => $d[1]) : ()),
+		($d[2] || ''  ne '' ? (crit => $d[2]) : ()),
+		($d[3] || ''  ne '' ? (min => $d[3]) : ($uom eq '%' ? '0' : ())),
+		($d[4] || ''  ne '' ? (max => $d[4]) : ($uom eq '%' ? '100' : ())),
+	    };
+	}
+	$href->{perf_data} = $data;
+    }
 
     $mqtt->publish(
 	topic => $topic,
-	message => $json,
+	message => encode_json($href),
 	);
 
     print "PUB: $topic\n";

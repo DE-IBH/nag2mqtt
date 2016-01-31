@@ -1,0 +1,18 @@
+Source: nag2mqtt
+Section: admin
+Priority: optional
+Maintainer: Thomas Liske <liske@ibh.de>
+Build-Depends: debhelper (>= 9), dh-systemd, libjson-c-dev
+Standards-Version: 3.9.5
+Homepage: https://github.com/DE-IBH/nag2mqtt
+Vcs-Git: https://github.com/DE-IBH/nag2mqtt.git
+Vcs-Browser: https://github.com/DE-IBH/nag2mqtt
+
+Package: nag2mqtt
+Architecture: any
+Depends: libanyevent-perl, libanyevent-mqtt-perl, libjson-perl, liblinux-inotify2-perl, ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends}
+Description: Nagios event broker to MQTT gateway
+ nag2mqtt consists of a Nagios Event Broker (NEB) module and a small perl
+ daemon. The NEB module publishes all check results in the local filesystem
+ (using tmpfs is highly recommended). These file are than publish by the
+ perl daemon to a MQTT broker.
