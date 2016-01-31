@@ -30,7 +30,6 @@ use AnyEvent;
 use AnyEvent::MQTT;
 use Linux::Inotify2;
 use Getopt::Std;
-use File::Slurp;
 use JSON;
 use Sys::Hostname;
 
@@ -120,7 +119,7 @@ $inotify->watch($conf{base_dir}, IN_ONLYDIR | IN_MOVED_TO, sub {
     my $e = shift;
     my $fn = $e->fullname;
 
-    publish_json( read_file($fn) );
+    publish_json( do { local(@ARGV, $/) = $fn; <> || ''} );
     unlink($fn);
  });
 
@@ -133,7 +132,7 @@ my $inot = AnyEvent->io(
 
 
 sub publish_json {
-    my $json = shift;
+    my $json = shift || return;
     my $href = decode_json($json);
     
     my @topic = ('', split(/\//, $conf{base_topic}));

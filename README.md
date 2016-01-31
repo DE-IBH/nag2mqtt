@@ -23,6 +23,5 @@ API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 #### Publisher (nag2mqttd):
 - AnyEvent
 - AnyEvent::MQTT
-- File::Slurp
 - JSON
 - Linux::Inotify2
