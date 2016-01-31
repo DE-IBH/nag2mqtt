@@ -149,17 +149,23 @@ sub publish_json {
 
 	    my ($label, $d) = ($1, $2);
 	    my @d = split(/;/, $d);
-	    next unless(scalar @d == 5);
 
 	    my $uom = ($d[0] =~ /\d+(\D+)$/ ? $1 : '');
+	    $val = $d[0] || '';
+	    if($val ne '') {
+		$val =~ s/$uom$//;
+	    }
+	    else {
+		$val = 'U';
+	    }
 
 	    $data->{$label} = {
-		val => $d[0] || 'U',
-		uom => $uom,
-		($d[1] ne '' ? (warn => $d[1]) : ()),
-		($d[2] ne '' ? (crit => $d[2]) : ()),
-		($d[3] ne '' ? (min => $d[3]) : ($uom eq '%' ? '0' : ())),
-		($d[4] ne '' ? (max => $d[4]) : ($uom eq '%' ? '100' : ())),
+		val => $val,
+		($uom ? (uom => $uom) : ()),
+		($d[1] || '' ne '' ? (warn => $d[1]) : ()),
+		($d[2] || ''  ne '' ? (crit => $d[2]) : ()),
+		($d[3] || ''  ne '' ? (min => $d[3]) : ($uom eq '%' ? '0' : ())),
+		($d[4] || ''  ne '' ? (max => $d[4]) : ($uom eq '%' ? '100' : ())),
 	    };
 	}
 	$href->{perf} = $data;
