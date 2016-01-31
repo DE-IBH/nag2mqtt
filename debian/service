@@ -1,0 +1,10 @@
+[Unit]
+Description=Nagios event broker to MQTT gateway
+After=network.target
+
+[Service]
+User=nag2mqtt
+ExecStart=/usr/sbin/nag2mqtt
+
+[Install]
+WantedBy=multi-user.target
