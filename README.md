@@ -1,8 +1,9 @@
-nag2mqtt - Nagios event broker to MQTT gateway
-==============================================
+# nag2mqtt
 
-About
------
+_Nagios event broker to MQTT gateway_
+
+
+## About
 
 nag2mqtt consists of a Nagios Event Broker (NEB) module and a small perl
 daemon. The NEB module publishes all check results in the local filesystem
@@ -12,14 +13,14 @@ perl daemon to a MQTT broker.
 The published check results could be used by websites using a MQTT WebSocket
 API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 
-Dependencies
-------------
 
-### NEB module (neb2mqtt.so):
+## Dependencies
+
+#### NEB module (neb2mqtt.so):
 - [libjson-c](https://github.com/json-c/json-c)
 - build: header files from [nagioscore](https://github.com/NagiosEnterprises/nagioscore)
 
-### Publisher (nag2mqttd):
+#### Publisher (nag2mqttd):
 - AnyEvent
 - AnyEvent::MQTT
 - File::Slurp
