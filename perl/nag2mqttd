@@ -151,7 +151,7 @@ sub publish_json {
 	    my @d = split(/;/, $d);
 
 	    my $uom = ($d[0] =~ /\d+(\D+)$/ ? $1 : '');
-	    $val = $d[0] || '';
+	    my $val = $d[0] || '';
 	    if($val ne '') {
 		$val =~ s/$uom$//;
 	    }
@@ -168,7 +168,7 @@ sub publish_json {
 		($d[4] || ''  ne '' ? (max => $d[4]) : ($uom eq '%' ? '100' : ())),
 	    };
 	}
-	$href->{perf} = $data;
+	$href->{perf_data} = $data;
     }
 
     $mqtt->publish(
