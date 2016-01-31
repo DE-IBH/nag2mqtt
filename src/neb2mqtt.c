@@ -217,6 +217,15 @@ int nag2mqtt_handle_host_check_data(int event_type, void *data) {
     JSON_ADD_STR(json, "output", hostchkdata->output);
     JSON_ADD_STR(json, "long_output", hostchkdata->long_output);
     JSON_ADD_STR(json, "perf_data", hostchkdata->perf_data);
+
+    /* Add meta data from host definition */
+    host *host = find_host(hostchkdata->host_name);
+    if(host) {
+      if(host->notes)
+	JSON_ADD_STR(json, "notes", host->notes);
+      if(host->icon_image)
+	JSON_ADD_STR(json, "icon_image", host->icon_image);
+    }
     
     fprintf(fh, "%s\n", json_object_to_json_string(json));
     fclose(fh);
@@ -270,7 +279,16 @@ int nag2mqtt_handle_service_check_data(int event_type, void *data) {
     JSON_ADD_STR(json, "output", srvchkdata->output);
     JSON_ADD_STR(json, "long_output", srvchkdata->long_output);
     JSON_ADD_STR(json, "perf_data", srvchkdata->perf_data);
-    
+
+    /* Add meta data from service definition */
+    service *service = find_service(srvchkdata->host_name, srvchkdata->service_description);
+    if(service) {
+      if(service->notes)
+	JSON_ADD_STR(json, "notes", service->notes);
+      if(service->icon_image)
+	JSON_ADD_STR(json, "icon_image", service->icon_image);
+    }
+
     fprintf(fh, "%s\n", json_object_to_json_string(json));
     fclose(fh);
 
