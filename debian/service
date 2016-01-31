@@ -5,6 +5,8 @@ After=network.target
 [Service]
 User=nag2mqtt
 ExecStart=/usr/sbin/nag2mqtt
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

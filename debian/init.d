@@ -21,6 +21,7 @@ DAEMON=/usr/sbin/nag2mqttd
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+USERNAME=nag2mqtt
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -59,10 +60,10 @@ do_start()
 	# The above code will not work for interpreted scripts, use the next
 	# six lines below instead (Ref: #643337, start-stop-daemon(8) )
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --startas $DAEMON \
-		--name $NAME --test > /dev/null \
+		--name $NAME --chuid $USERNAME --test > /dev/null \
 		|| return 1
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --startas $DAEMON \
-		--name $NAME -- $DAEMON_ARGS \
+		--name $NAME --chuid $USERNAME -- $DAEMON_ARGS \
 		|| return 2
 
 	# Add code here, if necessary, that waits for the process to be ready
