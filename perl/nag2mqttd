@@ -134,16 +134,40 @@ my $inot = AnyEvent->io(
 sub publish_json {
     my $json = shift || return;
     my $href = decode_json($json);
-    
+
     my @topic = ('', split(/\//, $conf{base_topic}));
     push(@topic, $href->{_prefix}) if($href->{_prefix});
     push(@topic, $href->{hostname});
     push(@topic, $href->{service_description}) if($href->{_type} eq 'SERVICE');
     my $topic = join('/', @topic);
 
+    if(exists($href->{perf_data})) {
+	my $perf = $href->{perf_data};
+	my $data = {};
+	foreach my $date (split(/\s+/, $href->{perf_data})) {
+	    next unless($date =~ /([^=]+)=(.+)$/);
+
+	    my ($label, $d) = ($1, $2);
+	    my @d = split(/;/, $d);
+	    next unless(scalar @d == 5);
+
+	    my $uom = ($d[0] =~ /\d+(\D+)$/ ? $1 : '');
+
+	    $data{$label} = {
+		val => $d[0] || 'U',
+		uom => $uom,
+		($d[1] ne '' ? warn => $d[1]),
+		($d[2] ne '' ? crit => $d[2]),
+		($d[3] ne '' ? min => $d[3] : ($uom eq '%' ? '0')),
+		($d[4] ne '' ? max => $d[4] : ($uom eq '%' ? '100')),
+	    };
+	}
+	$href->{perf} = $data;
+    }
+
     $mqtt->publish(
 	topic => $topic,
-	message => $json,
+	message => encode_json($href),
 	);
 
     print "PUB: $topic\n";
