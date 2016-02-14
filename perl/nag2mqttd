@@ -139,7 +139,7 @@ sub publish_json {
     my $href = decode_json($json);
 
     my @topic = (split(/\//, $conf{base_topic}));
-    push(@topic, 'states');
+    push(@topic, 'checks');
     push(@topic, $href->{_prefix}) if($href->{_prefix});
     push(@topic, $href->{hostname});
     push(@topic, $href->{service_description}) if($href->{_type} eq 'SERVICE');
