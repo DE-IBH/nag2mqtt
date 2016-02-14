@@ -18,6 +18,7 @@ API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 
 #### NEB module (neb2mqtt.so):
 - [libjson-c](https://github.com/json-c/json-c)
+- [libmhash](http://mhash.sourceforge.net/)
 - build:
   - pkg-config
   - header files from [nagioscore](https://github.com/NagiosEnterprises/nagioscore), use `git submodule init`
