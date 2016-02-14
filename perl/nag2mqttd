@@ -52,7 +52,8 @@ my %mqtt_conf = (
     on_error => sub {
 	my ($fatal, $message) = @_;
 
-	die "$fatal $message\n";
+	die "$message\n" if($fatal);
+	warn "$message\n" unless($fatal);
     },
 );
 
