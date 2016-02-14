@@ -52,7 +52,8 @@ my %mqtt_conf = (
     on_error => sub {
 	my ($fatal, $message) = @_;
 
-	die "$fatal $message\n";
+	die "$message\n" if($fatal);
+	warn "$message\n" unless($fatal);
     },
 );
 
@@ -133,6 +134,8 @@ my $inot = AnyEvent->io(
 
 sub publish_json {
     my $json = shift || return;
+    # strip invalid utf8 stuff
+    $json =~ s/[^[:print:]\s]//g;
     my $href = decode_json($json);
 
     my @topic = (split(/\//, $conf{base_topic}));
