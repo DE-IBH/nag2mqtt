@@ -1,3 +1,9 @@
+nag2mqtt (0.3) unstable; urgency=low
+
+  * [MQTT] Publish host/service states in sub topic ($basedir/states).
+
+ -- Thomas Liske <thomas@fiasko-nw.net>  
+
 nag2mqtt (0.2) unstable; urgency=low
 
   * Do not add a trailing slash to topics.
