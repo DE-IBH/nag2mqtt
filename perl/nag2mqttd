@@ -133,6 +133,8 @@ my $inot = AnyEvent->io(
 
 sub publish_json {
     my $json = shift || return;
+    # strip invalid utf8 stuff
+    $json =~ s/[^[:print:]\s]//g;
     my $href = decode_json($json);
 
     my @topic = (split(/\//, $conf{base_topic}));
