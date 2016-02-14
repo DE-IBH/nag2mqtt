@@ -1,3 +1,9 @@
+nag2mqtt (0.2) unstable; urgency=low
+
+  * Do not add a trailing slash to topics.
+
+ -- Thomas Liske <thomas@fiasko-nw.net>  
+
 nag2mqtt (0.1) unstable; urgency=low
 
   * Initial Release.
