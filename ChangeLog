@@ -1,3 +1,13 @@
+nag2mqtt (0.2) unstable; urgency=low
+
+  * Do not add a trailing slash to topics.
+  * Fix permissions on config files.
+  * Strip invalid utf8 chars from nagios.
+  * [NEB] Used hashed filenames.
+  * [NEB] Add some error logging.
+
+ -- Thomas Liske <thomas@fiasko-nw.net>  Sun, 14 Feb 2016 22:22:04 +0100
+
 nag2mqtt (0.1) unstable; urgency=low
 
   * Initial Release.

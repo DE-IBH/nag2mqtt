@@ -29,6 +29,8 @@
 #include <getopt.h>
 #include <wordexp.h>
 #include <string.h>
+#include <errno.h>
+#include <mhash.h>
 
 /* include local copy of nagios 3.5 headers */
 #include "include/nagios/nebmodules.h"
@@ -176,6 +178,26 @@ int nebmodule_deinit(int flags, int reason) {
   ptr = (val); \
   json_object_object_add((json), (key), json_object_new_string( (ptr ? ptr : "") ));
 
+int nag2mqtt_hashfn(const char *fn, char *hstr) {
+  MHASH td;
+  unsigned char hash[16];
+  int i;
+
+  td = mhash_init(MHASH_TIGER128);
+
+  if (td == MHASH_FAILED)
+    return -1;
+
+  mhash(td, fn, strlen(fn)); 
+  mhash_deinit(td, hash);
+
+  for (i = 0; i < mhash_get_block_size(MHASH_TIGER128); i++) {
+    sprintf(&(hstr[i*2]), "%.2x", hash[i]);
+  }
+  hstr[i*2 + 1] = 0;
+
+  return 0;
+}
 
 /* Process host check data */
 int nag2mqtt_handle_host_check_data(int event_type, void *data) {
@@ -191,12 +213,19 @@ int nag2mqtt_handle_host_check_data(int event_type, void *data) {
   if(hostchkdata->type != NEBTYPE_HOSTCHECK_PROCESSED)
     return 0;
 
+  char hkey[PATH_MAX];
+  char hfn[PATH_MAX];
   char fn1[PATH_MAX];
   char fn2[PATH_MAX];
 
-  snprintf(fn1, PATH_MAX, "%s/%s:host.new", basedir, hostchkdata->host_name);
+  snprintf(hkey, PATH_MAX, "%s:host", hostchkdata->host_name);
+  NULLIFY(hkey);
+  if(nag2mqtt_hashfn(hkey, hfn))
+    return 0;
+
+  snprintf(fn1, PATH_MAX, "%s/%s.new", basedir, hfn);
   NULLIFY(fn1);
-  snprintf(fn2, PATH_MAX, "%s/%s:host", basedir, hostchkdata->host_name);
+  snprintf(fn2, PATH_MAX, "%s/%s", basedir, hfn);
   NULLIFY(fn2);
 
   FILE *fh = fopen(fn1, "wx");
@@ -234,6 +263,14 @@ int nag2mqtt_handle_host_check_data(int event_type, void *data) {
 
     json_object_put(json);
   }
+  else {
+    char buf[4096];
+
+    snprintf(buf, sizeof(buf), "nag2mqtt: failed to open %s: %s (%d)", fn1, strerror(errno), errno);
+    NULLIFY(buf);
+    write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
+  }
+
   return 0;
 }
 
@@ -252,12 +289,19 @@ int nag2mqtt_handle_service_check_data(int event_type, void *data) {
   if(srvchkdata->type != NEBTYPE_SERVICECHECK_PROCESSED)
     return 0;
 
+  char hkey[PATH_MAX];
+  char hfn[PATH_MAX];
   char fn1[PATH_MAX];
   char fn2[PATH_MAX];
 
-  snprintf(fn1, PATH_MAX, "%s/%s:%s:service.new", basedir, srvchkdata->host_name, srvchkdata->service_description);
+  snprintf(hkey, PATH_MAX, "%s:%s:service", srvchkdata->host_name, srvchkdata->service_description);
+  NULLIFY(hkey);
+  if(nag2mqtt_hashfn(hkey, hfn))
+    return 0;
+
+  snprintf(fn1, PATH_MAX, "%s/%s.new", basedir, hfn);
   NULLIFY(fn1);
-  snprintf(fn2, PATH_MAX, "%s/%s:%s:service", basedir, srvchkdata->host_name, srvchkdata->service_description);
+  snprintf(fn2, PATH_MAX, "%s/%s", basedir, hfn);
   NULLIFY(fn2);
 
   FILE *fh = fopen(fn1, "wx");
@@ -295,6 +339,13 @@ int nag2mqtt_handle_service_check_data(int event_type, void *data) {
     rename(fn1, fn2);
 
     json_object_put(json);
+  }
+  else {
+    char buf[4096];
+
+    snprintf(buf, sizeof(buf), "nag2mqtt: failed to open %s: %s (%d)", fn1, strerror(errno), errno);
+    NULLIFY(buf);
+    write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
   }
 
   return 0;
