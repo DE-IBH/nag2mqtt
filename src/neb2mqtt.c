@@ -29,6 +29,7 @@
 #include <getopt.h>
 #include <wordexp.h>
 #include <string.h>
+#include <errno.h>
 
 /* include local copy of nagios 3.5 headers */
 #include "include/nagios/nebmodules.h"
@@ -234,6 +235,14 @@ int nag2mqtt_handle_host_check_data(int event_type, void *data) {
 
     json_object_put(json);
   }
+  else {
+    char buf[4096];
+
+    snprintf(buf, sizeof(buf), "nag2mqtt: failed to open %s: %s (%d)", fn1, strerror(errno), errno);
+    NULLIFY(buf);
+    write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
+  }
+
   return 0;
 }
 
@@ -295,6 +304,13 @@ int nag2mqtt_handle_service_check_data(int event_type, void *data) {
     rename(fn1, fn2);
 
     json_object_put(json);
+  }
+  else {
+    char buf[4096];
+
+    snprintf(buf, sizeof(buf), "nag2mqtt: failed to open %s: %s (%d)", fn1, strerror(errno), errno);
+    NULLIFY(buf);
+    write_to_all_logs(buf, NSLOG_INFO_MESSAGE);
   }
 
   return 0;
