@@ -1,5 +1,6 @@
 nag2mqtt (0.3) unstable; urgency=low
 
+  * [MQTT] Fix odd number of elements warning.
   * [MQTT] Publish host/service states in sub topic ($basedir/checks).
 
  -- Thomas Liske <thomas@fiasko-nw.net>  
