@@ -1,6 +1,9 @@
 nag2mqtt (0.2) unstable; urgency=low
 
   * Do not add a trailing slash to topics.
+  * Fix permissions on config files.
+  * [NEB] Used hashed filenames.
+  * [NEB] Add some error logging.
 
  -- Thomas Liske <thomas@fiasko-nw.net>  
 
