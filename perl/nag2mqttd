@@ -202,6 +202,7 @@ sub publish_json {
     push(@topic, $href->{hostname});
     push(@topic, $href->{service_description}) if($href->{_type} eq 'SERVICE');
     my $topic = join('/', @topic);
+    $topic =~ s/[#+]//g;
 
     if(exists($href->{perf_data})) {
 	my $perf = $href->{perf_data};
