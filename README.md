@@ -28,3 +28,5 @@ API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 - AnyEvent::MQTT
 - JSON
 - Linux::Inotify2
+- Log::Dispatch
+- Proc::PID::File
