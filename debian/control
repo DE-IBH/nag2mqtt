@@ -10,7 +10,9 @@ Vcs-Browser: https://github.com/DE-IBH/nag2mqtt
 
 Package: nag2mqtt
 Architecture: any
-Depends: libanyevent-perl, libanyevent-mqtt-perl, libjson-perl, liblinux-inotify2-perl, ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends}
+Depends: libanyevent-perl, libanyevent-mqtt-perl, libjson-perl, liblinux-inotify2-perl,
+ liblog-dispatch-perl, libproc-pid-file-perl,
+ ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends}
 Description: Nagios event broker to MQTT gateway
  nag2mqtt consists of a Nagios Event Broker (NEB) module and a small perl
  daemon. The NEB module publishes all check results in the local filesystem

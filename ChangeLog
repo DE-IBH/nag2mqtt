@@ -1,3 +1,14 @@
+nag2mqtt (0.3) unstable; urgency=low
+
+  * Add logging (console, syslog).
+  * Add PID file handling.
+  * Strip wildcards [+#] from topic names.
+  * [MQTT] Fix odd number of elements warning.
+  * [MQTT] Publish host/service states in sub-topic ($basedir/checks).
+  * [MQTT] Reconnect to MQTT after 30s on MQTT fatal failures.
+
+ -- Thomas Liske <thomas@fiasko-nw.net>  Sun, 27 Mar 2016 14:10:14 +0200
+
 nag2mqtt (0.2) unstable; urgency=low
 
   * Do not add a trailing slash to topics.
