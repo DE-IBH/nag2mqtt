@@ -55,6 +55,7 @@ my %conf = (
 
 # MQTT settings
 my $w_reconn;
+my $mqtt;
 my %mqtt_conf = (
     host => q(localhost),
 
@@ -78,6 +79,8 @@ my %mqtt_conf = (
 	}
 
 	if($fatal) {
+	    $mqtt->cleanup;
+	    $mqtt = undef;
 	    $w_reconn = AnyEvent->timer(
 		after => 20,
 		cb => \&connect_mqtt,
@@ -153,7 +156,6 @@ my %cv = (
 );
 
 
-my $mqtt;
 sub connect_mqtt {
     $mqtt = AnyEvent::MQTT->new(%mqtt_conf);
     $mqtt->publish(
@@ -231,7 +233,7 @@ sub publish_json {
     $mqtt->publish(
 	topic => $topic,
 	message => encode_json($href),
-	);
+	) if(defined($mqtt));
 }
 
 
