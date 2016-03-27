@@ -1,9 +1,11 @@
 nag2mqtt (0.3) unstable; urgency=low
 
   * [MQTT] Fix odd number of elements warning.
-  * [MQTT] Publish host/service states in sub topic ($basedir/checks).
+  * [MQTT] Publish host/service states in sub-topic ($basedir/checks).
+  * [MQTT] Reconnect to MQTT after 30s on MQTT fatal failures.
+  * Add logging (console, syslog).
 
- -- Thomas Liske <thomas@fiasko-nw.net>  
+ -- Thomas Liske <thomas@fiasko-nw.net>  Sun, 27 Mar 2016 12:15:49 +0200
 
 nag2mqtt (0.2) unstable; urgency=low
 
