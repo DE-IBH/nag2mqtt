@@ -153,8 +153,18 @@ my %cv = (
 );
 
 
-my $mqtt = AnyEvent::MQTT->new(%mqtt_conf);;
-
+my $mqtt;
+sub connect_mqtt {
+    $mqtt = AnyEvent::MQTT->new(%mqtt_conf);
+    $mqtt->publish(
+	topic => $mqtt_conf{will_topic},
+	retain => 1,
+	message => encode_json({
+	    state => q(alive),
+	}),
+    );
+}
+connect_mqtt;
 
 my $inotify = new Linux::Inotify2 or
     die "unable to create new inotify object: $!\n";
