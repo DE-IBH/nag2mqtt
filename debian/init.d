@@ -19,7 +19,7 @@ DESC="nag2mqttd"
 NAME=nag2mqtt
 DAEMON=/usr/sbin/nag2mqttd
 DAEMON_ARGS=""
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/run/$NAME/nag2mqttd.pid
 SCRIPTNAME=/etc/init.d/$NAME
 USERNAME=nag2mqtt
 

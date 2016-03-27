@@ -34,7 +34,10 @@ use JSON;
 use Log::Dispatch;  
 use Log::Dispatch::Screen;
 use Log::Dispatch::Syslog;
+use Proc::PID::File;
 use Sys::Hostname;
+
+die "Daemon already running!\n" if(Proc::PID::File->running(verify => 1, dir => q(/run/nag2mqtt)));
 
 # logging stuff
 my $logfmt = sub {
