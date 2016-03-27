@@ -31,13 +31,30 @@ use AnyEvent::MQTT;
 use Linux::Inotify2;
 use Getopt::Std;
 use JSON;
+use Log::Dispatch;  
+use Log::Dispatch::Screen;
+use Log::Dispatch::Syslog;
 use Sys::Hostname;
 
+# logging stuff
+my $logfmt = sub {
+    my %p = @_;
+    return "[$p{level}] $p{message}\n";
+};
+my $logger = Log::Dispatch->new(callbacks => $logfmt);
+
+END {
+    $logger->notice('terminated') if(defined($logger));
+};
+
+# generic settings
 my %conf = (
     base_dir => q(/run/nag2mqtt/publish),
     base_topic => q(nagios),
 );
 
+# MQTT settings
+my $w_reconn;
 my %mqtt_conf = (
     host => q(localhost),
 
@@ -47,23 +64,50 @@ my %mqtt_conf = (
 	state => q(dead),
     }),
 
-    client_id => q(nag2mqtt),
+    client_id => q(nag2mqtt-).hostname,
 
     on_error => sub {
 	my ($fatal, $message) = @_;
 
-	die "$message\n" if($fatal);
-	warn "$message\n" unless($fatal);
+
+	if($fatal) {
+	    $logger->error("MQTT $message");
+	}
+	else {
+	    $logger->warning("MQTT $message");
+	}
+
+	if($fatal) {
+	    $w_reconn = AnyEvent->timer(
+		after => 20,
+		cb => \&connect_mqtt,
+	    );
+	}
     },
+);
+
+$logger->add(
+    Log::Dispatch::Screen->new(
+	name => 'console',
+	min_level => 'notice',
+    )
+);
+$logger->add(
+    Log::Dispatch::Syslog->new(
+	name => 'syslog',
+	min_level => 'info',
+	ident => 'nag2mqttd',
+	logopt => 'pid',
+	facility => 'user',
+    )
 );
 
 sub HELP_MESSAGE {
     print <<USG;
 Usage:
 
-  nag2mqttd [-v] [-c <cfg>]
+  nag2mqttd [-c <cfg>]
 
-    -v		be more verbose
     -c <cfg>	config filename
 
     --help      show this help
@@ -94,8 +138,7 @@ LIC
 }
 
 our $opt_c = '/etc/nag2mqtt/nag2mqtt.conf';
-our $opt_v;
-unless(getopts('c:v')) {
+unless(getopts('c:')) {
     HELP_MESSAGE;
     exit 1;
 }
@@ -139,6 +182,7 @@ sub publish_json {
     my $href = decode_json($json);
 
     my @topic = (split(/\//, $conf{base_topic}));
+    push(@topic, 'checks');
     push(@topic, $href->{_prefix}) if($href->{_prefix});
     push(@topic, $href->{hostname});
     push(@topic, $href->{service_description}) if($href->{_type} eq 'SERVICE');
@@ -167,8 +211,8 @@ sub publish_json {
 		($uom ? (uom => $uom) : ()),
 		($d[1] || '' ne '' ? (warn => $d[1]) : ()),
 		($d[2] || ''  ne '' ? (crit => $d[2]) : ()),
-		($d[3] || ''  ne '' ? (min => $d[3]) : ($uom eq '%' ? '0' : ())),
-		($d[4] || ''  ne '' ? (max => $d[4]) : ($uom eq '%' ? '100' : ())),
+		($d[3] || ''  ne '' ? (min => $d[3]) : ($uom eq '%' ? (min => '0') : ())),
+		($d[4] || ''  ne '' ? (max => $d[4]) : ($uom eq '%' ? (max => '100') : ())),
 	    };
 	}
 	$href->{perf_data} = $data;
@@ -178,8 +222,6 @@ sub publish_json {
 	topic => $topic,
 	message => encode_json($href),
 	);
-
-    print "PUB: $topic\n";
 }
 
 
@@ -191,4 +233,5 @@ $mqtt->publish(
     }),
 );
 
+$logger->notice('entering event loop...');
 $cv{quit}->recv;
