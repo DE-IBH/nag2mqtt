@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=nag2mqtt
-ExecStart=/usr/sbin/nag2mqtt
+ExecStart=/usr/sbin/nag2mqttd
 Restart=always
 RestartSec=5
 

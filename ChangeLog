@@ -1,3 +1,10 @@
+nag2mqtt (0.4) unstable; urgency=low
+
+  * Fix typo in daemon path of systemd service file.
+    (Thanks to Uwe Hentzschel <uhe@stahl-groeditz.de>)
+
+ -- Thomas Liske <thomas@fiasko-nw.net>  
+
 nag2mqtt (0.3) unstable; urgency=low
 
   * Add logging (console, syslog).
