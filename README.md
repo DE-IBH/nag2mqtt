@@ -13,6 +13,9 @@ perl daemon to a MQTT broker.
 The published check results could be used by websites using a MQTT WebSocket
 API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 
+*The Nagios header files in `external/nagios-3.5.0` are taken from the
+Nagios Core 3.5.0 sources. This should work fine with Check_MK.*
+
 
 ## Dependencies
 
@@ -21,7 +24,7 @@ API or tools like [mqttwarn](https://github.com/jpmens/mqttwarn).
 - [libmhash](http://mhash.sourceforge.net/)
 - build:
   - pkg-config
-  - header files from [nagioscore](https://github.com/NagiosEnterprises/nagioscore), use `git submodule init`
+  - header files for both libraries
 
 #### Publisher (nag2mqttd):
 - AnyEvent

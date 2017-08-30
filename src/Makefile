@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -fPIC -shared -Wall -g -lrt
 RM = rm -f
 
-CFLAGS += $(shell pkg-config --cflags json-c mhash)
+CFLAGS += $(shell pkg-config --cflags json-c mhash) -Iinclude -I.
 LDFLAGS += $(shell pkg-config --libs json-c mhash)
 
 all: neb2mqtt.so
