@@ -33,3 +33,9 @@ Nagios Core 3.5.0 sources. This should work fine with Check_MK.*
 - Linux::Inotify2
 - Log::Dispatch
 - Proc::PID::File
+
+
+## Install
+
+Details on installing nag2mqtt can be found in the documentation of
+[SNMD](http://snmd.readthedocs.io/en/latest/appx_nag2mqtt.html).

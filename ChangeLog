@@ -2,8 +2,11 @@ nag2mqtt (0.4) unstable; urgency=low
 
   * Fix typo in daemon path of systemd service file.
     (Thanks to Uwe Hentzschel <uhe@stahl-groeditz.de>)
+  * Embed nagios-core 3.5.0 headers since upstream removed
+    the sources.
+  * Link nag2mqtt's install documentation from SNMD.
 
- -- Thomas Liske <thomas@fiasko-nw.net>  
+ -- Thomas Liske <thomas@fiasko-nw.net>  Thu, 31 Aug 2017 11:06:28 +0200
 
 nag2mqtt (0.3) unstable; urgency=low
 
