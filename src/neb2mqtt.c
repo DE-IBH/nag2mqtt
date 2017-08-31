@@ -33,12 +33,12 @@
 #include <mhash.h>
 
 /* include local copy of nagios 3.5 headers */
-#include "include/nagios/nebmodules.h"
-#include "include/nagios/nebcallbacks.h"
-#include "include/nagios/nebstructs.h"
-#include "include/nagios/broker.h"
-#include "include/nagios/common.h"
-#include "include/nagios/nagios.h"
+#include <nagios/nebmodules.h>
+#include <nagios/nebcallbacks.h>
+#include <nagios/nebstructs.h>
+#include <nagios/broker.h>
+#include <nagios/common.h>
+#include <nagios/nagios.h>
 
 #include <json-c/json.h>
 

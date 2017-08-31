@@ -10,3 +10,5 @@ debian/nag2mqtt.postrm.debhelper
 debian/nag2mqtt.prerm.debhelper
 debian/nag2mqtt.substvars
 debian/nag2mqtt/
+debian/.debhelper/
+debian/debhelper-build-stamp

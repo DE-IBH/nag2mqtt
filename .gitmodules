@@ -1,4 +1,0 @@
-[submodule "external/nagioscore"]
-	path = external/nagioscore
-	url = https://github.com/NagiosEnterprises/nagioscore.git
-	branch = nagios3
